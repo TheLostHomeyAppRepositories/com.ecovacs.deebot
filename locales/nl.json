@@ -8,7 +8,7 @@
 			"error": "De inloggegevens zijn ongeldig!"
 		}
 	},
-	"Deebot": {
+	"error": {
 		"Error-3":			"Fout bij het parseren van antwoordgegevens",
 		"Error-2":			"Interne fout",
 		"Error-1":			"Host niet bereikbaar of communicatiestoring",

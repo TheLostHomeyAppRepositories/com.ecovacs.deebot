@@ -1,0 +1,30 @@
+{
+    "title": {
+        "en": "Get map image - Test flow card"
+    },
+    "titleFormatted": {
+        "en": "Get map image [[map]]"
+    },
+    "args": [
+        {
+            "type": "autocomplete",
+            "name": "map",
+            "required": true,
+            "title": {
+                "en": "Map",
+                "de": "Karte",
+                "nl": "Kaart"
+            },
+            "placeholder": {
+                "en": "Ground floor",
+                "de": "Erdgeschoss",
+                "nl": "Basislaag"
+            }
+        },
+        {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=deebot"
+        }
+    ]
+}

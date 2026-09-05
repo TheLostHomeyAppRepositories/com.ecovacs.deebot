@@ -8,7 +8,7 @@
             "error": "The login data is invalid!"
         }
 	},
-	"Deebot":{
+	"error":{
 		"Error-3":			"Error parsing response data",
 		"Error-2":			"Internal error",
 		"Error-1":			"Host not reachable or communication malfunction",

@@ -3,6 +3,10 @@
 const ecovacsApi = require('../../lib/ecovacsApi');
 const CONSTANTS = require('../../lib/constants.js');
 const { Device } = require('homey');
+
+const https = require('https');
+const crypto = require('crypto');
+
 // const tools = require('../../lib/tools');
 // const { PassThrough } = require('stream');
 // const crypto = require("crypto");
@@ -33,11 +37,6 @@ class VacuumDevice extends Device {
 		this.registerCapabilityListener('sweep_mode', this.onCapabilitySweepMode.bind(this));
 		this.registerCapabilityListener('clean_count_mode', this.onCapabilityCleanCountMode.bind(this));
 
-		// this.latestCleanLogImage = await this.homey.images.createImage();
-		// this.previousCleanLogImage = await this.homey.images.createImage();
-		// this.triggerCleanLogImage = await this.homey.images.createImage();
-
-
 		try{
 			// Init API and connect
 			await this.initApi();
@@ -46,79 +45,7 @@ class VacuumDevice extends Device {
 			this.error('Error: error.message ', error);
 			await this.setUnavailable(error.message).catch(this.error);
 		}
-
-		// this.homey.settings.on('set', (function (dynamicVariableName) { eval(dynamicVariableName + ' = this.homey.settings.get(dynamicVariableName)'); }).bind(this));
-
-
-		// this.registerCapabilityListener('alarm_tamper', this.onCapabilityAlert.bind(this));
-		// this.registerCapabilityListener('AutoClean', this.onCapabilityAutoClean.bind(this));
-		// this.registerCapabilityListener('PauseCleaning', this.onCapabilityPauseCleaning.bind(this));
-		// this.registerCapabilityListener('ReturnDock', this.onCapabilityReturnDock.bind(this));
-		// this.registerCapabilityListener('AutoEmpty', this.onCapabilityAutoEmpty.bind(this));
-		// this.registerCapabilityListener('VacuumPower', this.onCapabilityVacuumPower.bind(this));
-		// this.registerCapabilityListener('CleanCount', this.onCapabilityCleanCount.bind(this));
-		// this.registerCapabilityListener('WaterFlowLevel', this.onCapabilityWaterFlowLevel.bind(this));
-		// this.registerCapabilityListener('ScrubbingType', this.onCapabilityScrubbingType.bind(this));
-		// this.registerCapabilityListener('AromaMode', this.onCapabilityAromaMode.bind(this));
-		// this.registerCapabilityListener('GotoParkPosition', this.onCapabilityGotoParkPosition.bind(this));
-		// this.registerCapabilityListener('SetParkPosition', this.onCapabilitySetParkPosition.bind(this));
-
-		// const changeChargeStateTrigger = this.homey.flow.getDeviceTriggerCard('ChargeState');
-		// const changeOperationTrigger = this.homey.flow.getDeviceTriggerCard('Operation');
-		// const changeZoneTrigger = this.homey.flow.getDeviceTriggerCard('LocationReport');
-		// const errorReportTrigger = this.homey.flow.getDeviceTriggerCard('ErrorReport');
-		// const cleanReportTrigger = this.homey.flow.getDeviceTriggerCard('CleanReport');
-
-		// this.homey.flow.getActionCard('AutoClean').registerRunListener(async (args, state) => { this.vacbot.clean(); });
-		// this.homey.flow.getActionCard('GotoParkPosition').registerRunListener(async (args, state) => { this.vacbot.run('GoToPosition', this.getStoreValue('parkPosition')); this.setCapabilityValue('GotoParkPosition', true).catch((error) => { this.error('Error: ' + error); }); });
-		// this.homey.flow.getActionCard('ReturnDock').registerRunListener(async (args, state) => { this.setCapabilityValue('ReturnDock', true).catch((error) => { this.error('Error: ' + error); }); this.vacbot.charge(); });
-		// this.homey.flow.getActionCard('EmptyDustBin').registerRunListener(async (args, state) => { this.vacbot.run('EmptyDustBin'); });
-		// this.homey.flow.getActionCard('PauseCleaning').registerRunListener(async (args, state) => { this.setCapabilityValue('PauseCleaning', true).catch((error) => { this.error('Error: ' + error); }); this.vacbot.pause(); });
-		// this.homey.flow.getActionCard('ResumeCleaning').registerRunListener(async (args, state) => { this.setCapabilityValue('PauseCleaning', false).catch((error) => { this.error('Error: ' + error); }); this.vacbot.resume(); });
-		// this.homey.flow.getActionCard('SpotArea').registerRunListener(async (args, state) => { if (args.zone) { this.vacbot.spotArea(args.zone.zoneid); } });
-		// this.homey.flow.getActionCard('RawCommand').registerRunListener(async (args, state) => { this.vacbot.run(args.command.toString()); this.log('this.vacbot.run(' + args.command.toString() + ')') });
-		// this.homey.flow.getActionCard('SpotAreas').registerRunListener(async (args, state) => {
-		// 	if (args.zones) {
-		// 		var currentMap = this.getStoreValue('currentMap');
-		// 		let Zones = [];
-		// 		if (args.zones.includes('[')) {
-		// 			// Asume flowtokens are being used, but remove anything that is not in the [x:y] format
-		// 			let ZoneTokens = args.zones.match(/\[(.*?)\]/g);
-		// 			if (ZoneTokens) {
-		// 				ZoneTokens.forEach(ZoneToken => {
-		// 					let floorRoom = ZoneToken.split(':');
-		// 					let Floor = parseInt(floorRoom[0].replace(/[\[\]]/g, ''));
-		// 					let Zone = parseInt(floorRoom[1].replace(/[\[\]]/g, ''));
-		// 					if (!isNaN(Floor) && !isNaN(Zone)) { Zones.push({ Floor: Floor, Zone: Zone }); }
-		// 				});
-		// 			}
-		// 		} else {
-		// 			// Asume roomnumbers (seperated by a comma) are being used, but remove anything other then numbers and commas
-		// 			let Rooms = args.zones.replace(/\[.*?\]/g, '').replace(/\s/g, '').split(',');
-		// 			Rooms.forEach(Room => {
-		// 				if (/^\d+$/.test(Room)) {
-		// 					let Zone = parseInt(Room);
-		// 					if (!isNaN(Zone)) { Zones.push({ Floor: currentMap.mapIndex, Zone: Zone }); }
-		// 				}
-		// 			});
-		// 		}
-		// 		// If you want to filter rooms on the current floor, uncomment the line below
-		// 		// Zones = Zones.filter(Zone => Zone.Floor === currentMap.mapIndex);
-		// 		let CleaningZones = Zones.map(Zone => Zone.Zone).join(',');
-		// 		this.log('Clean zones: ' + CleaningZones);
-		// 		this.vacbot.spotArea(CleaningZones);
-		// 		if (appdebug) { this.log('Cmd: vacbot.spotArea(' + CleaningZones + ')'); }
-		// 	}
-		// });
-
-		// this.homey.flow.getConditionCard('MoppingModule').registerRunListener(async (args, state) => { const MoppingModule = await this.getCapabilityValue('MopStatus'); return MoppingModule; });
-		// this.homey.flow.getConditionCard('AutoEmptyState').registerRunListener(async (args, state) => { const AutoEmptyState = await this.getCapabilityValue('AutoEmpty'); return AutoEmptyState; });
-		// this.homey.flow.getConditionCard('CurrentMap').registerRunListener(async (args, state) => { return this.getStoreValue('currentMap').mapID == args.mapname.mapid; });
-
-		// this.homey.flow.getActionCard('SpotArea').registerArgumentAutocompleteListener('zone', this.flowAutocompleteactionSpotArea.bind(this));
-		// this.homey.flow.getConditionCard('CurrentMap').registerArgumentAutocompleteListener('mapname', async (query, args) => { var filtered = this.getStoreValue('mapnames').filter((element) => { return element.name.toLowerCase().includes(query.toLowerCase()); }); return filtered; });
 	}
-
 
 	// =======================================================================================================================================================================================
 	// DEVICE
@@ -183,27 +110,32 @@ class VacuumDevice extends Device {
 		try{
 			this.api = await ecovacsApi.getApi(this.getStoreValue('deviceId'));
 
-			// this.api.on('credentialsUpdated', (data) => { 
-			// 	this.log('credentialsUpdated'); 
-			// 	this.setStoreValue('api', this.api);
-			// });
+			// Variant using the auth token to login
+			// store auth token if changed
+			this.api.on('credentialsUpdated', (data) => { 
+				this.log('credentialsUpdated'); 
+				this.setStoreValue('api', this.api);
+			});
+			// try to use auth token. 
+			try{
+				this.log('setCredentials (token)');
+				const api = this.getStoreValue('api');
+				await this.api.setCredentials({
+					"email": this.getStoreValue('email'),
+					"uid": 	api.uid,
+					"user_access_token": api.user_access_token,
+					"tokenExpiresAt": api.tokenExpiresAt
+				});
+			}
+			catch(error){
+				this.log('credentials not valid, connect with user/password');
+				await this.api.connect( this.getStoreValue('email'), ecovacsApi.getPasswordHash(this.getStoreValue('password')) );
+			}
 
-			// try{
-			// 	this.log('setCredentials (token)');
-			// 	const api = this.getStoreValue('api');
-			// 	this.api.setCredentials({
-			// 		"email": this.getStoreValue('email'),
-			// 		"uid": 	api.uid,
-			// 		"user_access_token": api.user_access_token,
-			// 		"tokenExpiresAt": api.tokenExpiresAt
-			// 	});
-			// }
-			// catch(error){
-			// 	thsis.log('credentials not valid, connect with user/password');
-			// 	await this.api.connect( this.getStoreValue('email'), ecovacsApi.getPasswordHash(this.getStoreValue('password')) );
-			// }
-
-			await this.api.connect( this.getStoreValue('email'), ecovacsApi.getPasswordHash(this.getStoreValue('password')) );
+			// Variant using the user/password
+			// await this.api.connect( this.getStoreValue('email'), ecovacsApi.getPasswordHash(this.getStoreValue('password')) );
+			
+			// Enable auto refrsh for both variante
 			this.api.enableAutoTokenRefresh(this.getStoreValue('email'),  ecovacsApi.getPasswordHash(this.getStoreValue('password')));
 		}
 		catch(error){
@@ -249,19 +181,13 @@ class VacuumDevice extends Device {
 			this.log('ApiVersion : ' + this.api.getVersion());
 			this.log('Device is ready');
 
-			this.vacbot.on('CurrentStats', (currentStats) => {
-				if (appdebug) { this.log('vacbot.on(CurrentStats, ' + JSON.stringify(currentStats) + ')'); }
-			});
 			this.vacbot.on('WorkMode', (workMode) =>  this.onWorkMode(workMode));
 			this.vacbot.on('SweepMode', (mode) => this.onSweepMode(mode));
 			this.vacbot.on('WorkState', (workState) => this.onWorkState(workState));
 			this.vacbot.on('CleanCount', (cleanCount) => this.onCleanCount(cleanCount));
-			this.vacbot.on('CleanSpeed', (cleanSpeed) => {
-				if (appdebug) { this.log('vacbot.on(CleanSpeed, ' + JSON.stringify(cleanSpeed) + ')'); }
-			});
-			this.vacbot.on('BatteryLevel', (batteryLevel) => {
-				if (appdebug) { this.log('vacbot.on(BatteryLevel, ' + JSON.stringify(batteryLevel) + ')'); }
-			});
+			// this.vacbot.on('BatteryLevel', (batteryLevel) => {
+			// 	if (appdebug) { this.log('vacbot.on(BatteryLevel, ' + JSON.stringify(batteryLevel) + ')'); }
+			// });
 			this.vacbot.on('BatteryInfo', (battery) => this.onBatteryInfo(battery));
 			this.vacbot.on('ChargeState', (state) => this.onChargeState(state));
 			this.vacbot.on('DeebotPosition', (values) => this.onDebotPosition(position));
@@ -274,9 +200,20 @@ class VacuumDevice extends Device {
 			this.vacbot.on('MapSpotAreaInfo', async (area) => await this.onMapSpotAreaInfo(area));
 			this.vacbot.on('MapSet_V2', async (mapset) => await this.onMapSet(mapset));
 			this.vacbot.on('ErrorCode', async (errorcode) => await this.onErrorCode(errorcode));
+			this.vacbot.on('ErrorCode', async (error) => await this.onError(error));
 
 			this.vacbot.on('WaterBoxScrubbingType', async (mode) => { this.log('WaterBoxScrubbingType: ' + mode); });
 			this.vacbot.on('MoppingSystemInfo ', async (state) => this.log('MoppingSystemInfo: ' + state));
+
+			this.vacbot.on('CleanReport', (cleanReport) => this.onCleanReport(cleanReport));
+			this.vacbot.on('CleanLog', (cleanLog) => this.onCleanLog(cleanLog));
+			this.vacbot.on('LastCleanLogs', (lastCleanLogs) => this.onLastCleanLogs(lastCleanLogs));
+			this.vacbot.on('CurrentStats', (currentStats) => this.onCurrentStats(currentStats));
+			// this.vacbot.on('onWorkProgressReport ', async (state) => this.log('onWorkProgressReport: ' + state)); // currently not supported, example: { clean: 24, dry: 0, wash: 0 }
+			this.vacbot.on('TaskStarted', async (data) =>  { 
+				this.log('TaskStarted: ' + data); });
+
+			
 
 			this.vacbot.on('MapImage ', async (mapImage) => 
 				this.onMapImage(mapImage));
@@ -286,6 +223,10 @@ class VacuumDevice extends Device {
 				this.log('MapDataReady: ' + mapImage); });
 			this.vacbot.on('MapDataObject', async (mapImage) =>  { 
 				this.log('MapDataObject: ' + mapImage); });
+			this.vacbot.on('MapInfo', async (mapInfo) =>  { 
+				this.log('MapInfo: ' + mapInfo); });
+			this.vacbot.on('MinorMap', async (mapInfo) =>  { 
+				this.log('MinorMap: ' + mapInfo); });
 
 			// Update states
 			if (appdebug) { this.log('vacbot.run(GetWaterBoxInfo)'); } this.vacbot.run('GetWaterBoxInfo');
@@ -296,7 +237,6 @@ class VacuumDevice extends Device {
 			if (appdebug) { this.log('vacbot.run(GetAutoEmpty)'); } this.vacbot.run('GetAutoEmpty');
 			if (appdebug) { this.log('vacbot.run(GetBatteryState)'); } this.vacbot.run('GetBatteryState');
 			if (appdebug) { this.log('vacbot.run(GetCleanState)'); } this.vacbot.run('GetCleanState');
-			if (appdebug) { this.log('vacbot.run(GetCleanLogs)'); } this.vacbot.run('GetCleanLogs');
 			if (appdebug) { this.log('vacbot.run(GetPosition)'); } this.vacbot.run('GetPosition');
 			if (appdebug) { this.log('vacbot.run(GetStats)'); } this.vacbot.run('GetStats');
 			if (appdebug) { this.log('vacbot.run(GetWorkState)'); } this.vacbot.run('GetWorkState');
@@ -304,96 +244,13 @@ class VacuumDevice extends Device {
 			if (appdebug) { this.log('vacbot.run(GetWorkMode)'); } this.vacbot.run('GetWorkMode');
 			if (appdebug) { this.log('vacbot.run(GetSweepMode)'); } this.vacbot.run('GetSweepMode');
 			if (appdebug) { this.log('vacbot.run(GetMaps)'); } this._getMaps();
+			// if (appdebug) { this.log('vacbot.run(GetCleanReport)'); } this.vacbot.run('GetCleanReport');
 
-			this.vacbot.run("GetMapImage", 1132941211, "outline");
-
-			// this.vacbot.on('WaterBoxInfo', (level) => {
-			// 	this.setCapabilityValue('MopStatus', Boolean(level)).catch((error) => { this.error('Error: ' + error); });
-			// 	if (appdebug) { this.log('setCapabilityValue(MopStatus, ' + Boolean(level) + ')'); }
-			// });
-
-			// this.vacbot.on('CleanCount', (mode) => {
-			// 	this.setCapabilityValue('CleanCount', Boolean((mode - 1))).catch((error) => { this.error('Error: ' + error); });
-			// 	if (appdebug) { this.log('setCapabilityValue(CleanCount, ' + Boolean((mode - 1)) + ')'); }
-			// });
-
-			// this.vacbot.on('CleanSpeed', (level) => {
-			// 	this.setCapabilityValue('VacuumPower', level.toString()).catch((error) => { this.error('Error: ' + error); });
-			// 	if (appdebug) { this.log('setCapabilityValue(VacuumPower, ' + level.toString() + ')'); }
-			// });
-
-			// this.vacbot.on('WaterLevel', (level) => {
-			// 	this.setCapabilityValue('WaterFlowLevel', level.toString()).catch((error) => { this.error('Error: ' + error); });
-			// 	if (appdebug) { this.log('setCapabilityValue(WaterFlowLevel, ' + level.toString() + ')'); }
-			// });
-
-			// this.vacbot.on('AutoEmpty', (mode) => {
-			// 	this.setCapabilityValue('AutoEmpty', Boolean(mode)).catch((error) => { this.error('Error: ' + error); });
-			// 	if (appdebug) { this.log('setCapabilityValue(AutoEmpty, ' + Boolean(mode) + ')'); }
-			// });
-
-			// this.vacbot.on('AromaMode', (mode) => {
-			// 	this.setCapabilityValue('AromaMode', Boolean(mode)).catch((error) => { this.error('Error: ' + error); });
-			// 	if (appdebug) { this.log('setCapabilityValue(AromaMode, ' + Boolean(mode) + ')'); }
-			// });
-
-			// this.vacbot.on('BatteryInfo', (battery) => {
-			// 	this.setCapabilityValue('measure_battery', Math.round(battery)).catch((error) => { this.error('Error: ' + error); });
-			// 	if (appdebug) { this.log('setCapabilityValue(measure_battery, ' + Math.round(battery) + ')'); }
-			// });
-
-			// this.vacbot.on('WaterBoxScrubbingType', (mode) => {
-			// 	this.setCapabilityValue('ScrubbingType', Boolean(mode - 1)).catch((error) => { this.error('Error: ' + error); });
-			// 	if (appdebug) { this.log('setCapabilityValue(ScrubbingType, ' + Boolean(mode - 1) + ')'); }
-			// });
+			// this.vacbot.run("GetMapImage", 1132941211, "outline");
 
 			// this.vacbot.on('CleanLog', async (object) => {
 			// 	if (appdebug) { this.log('vacbot.on(CleanLog, ' + object + ')'); }
 			// 	if (object.length === 0) { return; }
-			// 	try {
-			// 		this.latestCleanLogImage.setStream(async (stream) => {
-			// 			this.log('Updating latest CleanLog image');
-			// 			try{
-			// 				const latestCleanLogImageData = await this.downloadSecuredContent(object[0]);
-			// 				stream.write(latestCleanLogImageData);
-			// 				stream.end();
-			// 			} catch (error) { this.error('error: ' + error); this.log('Error getting image: ' + JSON.stringify(object)); }
-			// 		});
-			// 		// if (init) {
-			// 		this.setCameraImage('Latest Cleanlog', 'Latest Cleanlog', this.latestCleanLogImage).catch((error) => { this.error('Error: ' + error); });
-			// 		// } else {
-			// 		// 	this.latestCleanLogImage.update();
-			// 		// }
-			// 	} catch (error) { this.error('error: ' + error); this.error('object: ' + JSON.stringify(object)); }
-
-			// 	try {
-			// 		this.previousCleanLogImage.setStream(async (stream) => {
-			// 			this.log('Updating previous CleanLog image');
-			// 			try{
-			// 				const latestCleanLogImageData = await this.downloadSecuredContent(object[1]);
-			// 				stream.write(latestCleanLogImageData);
-			// 				stream.end();
-			// 			} catch (error) { this.error('error: ' + error); this.log('Error getting image: ' + JSON.stringify(object)); }
-			// 		});
-			// 		// if (init) {
-			// 		this.setCameraImage('Previous Cleanlog', 'Previous Cleanlog', this.previousCleanLogImage).catch((error) => { this.error('Error: ' + error); });
-			// 		// } else {
-			// 		// 	this.previousCleanLogImage.update();
-			// 		// }
-			// 	} catch (error) { this.error('error: ' + error); this.error('object: ' + JSON.stringify(object)); }
-
-			// 	try {
-			// 		this.triggerCleanLogImage.setStream(async (stream) => {
-			// 			this.log('Updating CleanLog trigger image');
-			// 			try{
-			// 				const latestCleanLogImageData = await this.downloadSecuredContent(object[0]);
-			// 				stream.write(latestCleanLogImageData);
-			// 				stream.end();
-			// 			} catch (error) { this.error('error: ' + error); this.log('Error getting image: ' + JSON.stringify(object)); }
-			// 		});
-			// 		this.triggerCleanLogImage.update();
-			// 	} catch (error) { this.error('error: ' + error); this.error('object: ' + JSON.stringify(object)); }
-
 			// 	var stopReason = -1;
 			// 	try {
 			// 		switch ((object[0].stopReason - 1).toString()) {
@@ -414,156 +271,6 @@ class VacuumDevice extends Device {
 			// 			default: stopReason = 'UNKNOWN (' + object[0].stopReason + ')';
 			// 		}
 			// 	}
-			// 	catch(error) {
-			// 		this.error('no stopReason error: ' + error);
-			// 		this.error('object: ' + JSON.stringify(object));
-			// 	}
-
-			// 	var tokens = {
-			// 		image: this.triggerCleanLogImage,
-			// 		date: new Date(object[0].timestamp * 1000).toLocaleString(this.homey.i18n.getLanguage(), { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: this.homey.clock.getTimezone(), hour12: false }).replace(',', ''),
-			// 		stopReason: stopReason,
-			// 		type: object[0].type.toString(),
-			// 		mopped: this.getCapabilityValue('MopStatus')
-			// 	};
-			// 	if (tokens.mopped == undefined){
-			// 		tokens.mopped = false;
-			// 	}
-
-			// 	if (appdebug) { this.log('Init: ' + init); }
-			// 	if (!init) {
-			// 		this.log('New CleanLog was received, triggering cleanReportTrigger');
-			// 		cleanReportTrigger.trigger(this, tokens);
-			// 	} else {
-			// 		init = false;
-			// 	}
-			// });
-
-			// this.vacbot.on('CleanReport', (status) => {
-			// 	if (appdebug) { this.log('vacbot.on(CleanReport, ' + status + ')'); }
-			// 	if (status !== this.getCapabilityValue('Operation')) {
-			// 		this.log('Current Operation: ' + status);
-			// 		this.setCapabilityValue('alarm_tamper', false).catch((error) => { this.error('Error: ' + error); });
-			// 		switch (status) {
-			// 			case 'parking':
-			// 				this.setCapabilityValue('AutoClean', false).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('ReturnDock', false).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('PauseCleaning', false).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('GotoParkPosition', true).catch((error) => { this.error('Error: ' + error); });
-			// 				break;
-			// 			case 'pause':
-			// 				this.setCapabilityValue('PauseCleaning', true).catch((error) => { this.error('Error: ' + error); });
-			// 				break;
-			// 			case 'idle':
-			// 				const PauseCleaning = this.getCapabilityValue('PauseCleaning');
-			// 				this.setCapabilityValue('AutoClean', false).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('ReturnDock', false).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('PauseCleaning', false).catch((error) => { this.error('Error: ' + error); });
-			// 				if (!PauseCleaning) { this.vacbot.run('GetCleanLogs'); }
-			// 				break;
-			// 			case 'auto':
-			// 				this.setCapabilityValue('AutoClean', true).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('ReturnDock', false).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('PauseCleaning', false).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('GotoParkPosition', false).catch((error) => { this.error('Error: ' + error); });
-			// 				break;
-			// 			case 'returning':
-			// 				this.setCapabilityValue('AutoClean', false).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('ReturnDock', true).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('PauseCleaning', false).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('GotoParkPosition', false).catch((error) => { this.error('Error: ' + error); });
-			// 				break;
-			// 			case 'alert':
-			// 				this.setCapabilityValue('alarm_tamper', true).catch((error) => { this.error('Error: ' + error); });
-			// 				break;
-			// 			default:
-			// 				this.setCapabilityValue('ReturnDock', false).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('AutoClean', false).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('PauseCleaning', false).catch((error) => { this.error('Error: ' + error); });
-			// 				this.setCapabilityValue('GotoParkPosition', false).catch((error) => { this.error('Error: ' + error); });
-			// 		}
-			// 	}
-			// 	if (typeof status !== "undefined") {
-			// 		this.setCapabilityValue('Operation', status).catch((error) => { this.error('Error: ' + error); });
-			// 		changeOperationTrigger.trigger(this, { operation: status });
-			// 	} else {
-			// 		this.setCapabilityValue('Operation', 'Going loco! (' + state + ')').catch((error) => { this.error('Error: ' + error); });
-			// 	}
-			// });
-
-			// this.vacbot.on('ChargeState', (status) => {
-			// 	if (appdebug) { this.log('vacbot.on(ChargeState, ' + status + ')'); }
-			// 	let oldStatus = this.getCapabilityValue('Charge');
-
-			// 	switch (status) {
-			// 		case 'idle':
-			// 			this.setCapabilityValue('Charge', 'Discharging').catch((error) => { this.error('Error: ' + error); });
-			// 			break;
-			// 		case 'charging':
-			// 			if (this.getCapabilityValue('measure_battery') !== 100) {
-			// 				this.setCapabilityValue('Charge', 'Charging').catch((error) => { this.error('Error: ' + error); });
-			// 			} else {
-			// 				this.setCapabilityValue('Charge', 'Fully charged').catch((error) => { this.error('Error: ' + error); });
-			// 			}
-			// 			break;
-			// 		default:
-			// 			this.setCapabilityValue('Charge', 'Unknown').catch((error) => { this.error('Error: ' + error); });
-			// 	}
-
-			// 	if (oldStatus && (oldStatus != status)) {
-			// 		try {
-			// 			changeChargeStateTrigger.trigger(this, { state: this.getCapabilityValue('Charge') });
-			// 		}
-			// 		catch (error) {
-			// 			this.error('ChargeState trigger error: ', error);
-			// 		}
-			// 	}
-			// });
-
-			// this.vacbot.on('DeebotPosition', async (values) => {
-
-			// 	const SetParkPosition = await this.getCapabilityValue('SetParkPosition');
-			// 	const PauseCleaning = await this.getCapabilityValue('PauseCleaning');
-
-			// 	if (SetParkPosition && PauseCleaning) {
-			// 		this.setStoreValue('parkPosition', values).catch((error) => { this.error('Error: ' + error); });
-			// 		if (appdebug) { this.log('Park position set to ', values); }
-			// 		setTimeout(() => {
-			// 			this.setCapabilityValue('SetParkPosition', false).catch((error) => { this.error('Error: ' + error); });
-			// 		}, 1000);
-			// 	}
-
-			// 	let CurrentZone = 'unknown';
-			// 	let OldZone = this.getCapabilityValue('CurrentZone');
-			// 	let currentMap = this.getStoreValue('currentMap');
-			// 	var tableAreas = this.getStoreValue('areas');
-			// 	tableAreas.forEach(function (area) {
-			// 		let coord = values.split(',');
-			// 		if (tools.pointInPolygon(area.boundaries, [Number(coord[0]), Number(coord[1])]) && area.mapid == currentMap.mapID) {
-			// 			CurrentZone = area.name;
-			// 		}
-			// 	});
-			// 	this.setCapabilityValue('CurrentZone', CurrentZone).catch((error) => { this.error('Error: ' + error); });
-			// 	if (OldZone && (OldZone != CurrentZone)) {
-			// 		try {
-			// 			this.setCapabilityValue('PauseCleaning', false).catch((error) => { this.error('Error: ' + error); });
-			// 			changeZoneTrigger.trigger(this, { zone: CurrentZone });
-			// 		}
-			// 		catch (error) {
-			// 			this.error('DeebotPosition trigger error: ', error);
-			// 		}
-			// 	}
-			// });
-
-			// this.vacbot.on('ErrorCode', (errorcode) => {
-			// 	if (parseInt(errorcode) !== 0 && parseInt(errorcode) !== 100) {
-			// 		var error = JSON.stringify(this.homey.__("Deebot.Error" + errorcode));
-			// 		this.error('Deebot Error: ', error + " (errorcode " + errorcode + ")");
-			// 		errorReportTrigger.trigger(this, { error: error, errorcode: parseInt(errorcode) });
-			// 	}
-			// });
-
-
 
 
 
@@ -588,6 +295,9 @@ class VacuumDevice extends Device {
 
 	onWorkState(workState){
 		if (appdebug) { this.log('vacbot.on(WorkState, ' + JSON.stringify(workState) + ')'); }
+
+		let lastRobotState = this.getCapabilityValue('state_device');
+
 		switch (workState.robot) {
 			case CONSTANTS.WORKMODE_ROBOT_CLEANING: 
 				this.setCapabilityValue('clean', true).catch((error) => { this.log('Error: ' + error); }); 
@@ -616,6 +326,13 @@ class VacuumDevice extends Device {
 		else{
 			this.setCapabilityValue('dry_mop', false).catch((error) => { this.log('Error: ' + error); });
 		}
+
+		// get clean log
+		if (lastRobotState != CONSTANTS.WORKMODE_ROBOT_IDLE &&
+			workState.robot == CONSTANTS.WORKMODE_ROBOT_IDLE ) {
+			this.vacbot.run('GetCleanLogs');
+		}
+
 	}
 
 
@@ -637,7 +354,17 @@ class VacuumDevice extends Device {
 
 	onChargeState(state){
 		if (appdebug) { this.log('vacbot.on(ChargeState, ' + JSON.stringify(state) + ')'); }
+
+		// let lastChargeState = this.getCapabilityValue('state_charge');
+
 		this.setCapabilityValue('state_charge', state).catch((error) => { this.log('Error: ' + error); });
+
+		// clean log request now done for robot state (WorkState)
+		// // work done (charge state idle => charging)
+		// if (lastChargeState == CONSTANTS.CHARGE_STATE_IDLE &&
+		// 	state == CONSTANTS.CHARGE_STATE_CHARGING ) {
+		// 	this.vacbot.run('GetCleanLogs');
+		// }
 	}
 
 	onCleanSpeed(level){
@@ -709,6 +436,50 @@ class VacuumDevice extends Device {
 		this.setCapabilityValue('sweep_mode', mode.toString()).catch((error) => { this.error('Error: ' + error); });
 		this.setCapabilityValue('sweep_mode.display', mode.toString()).catch((error) => { this.error('Error: ' + error); });
 		// 0=Standard, 1=Tief, 2=Effizient
+	}
+
+	onCleanLog(cleanLog){
+		// if (appdebug) { this.log('vacbot.on(CleanLog, ' + JSON.stringify(cleanLog) + ')'); }
+		if (appdebug) { this.log('vacbot.on(CleanLog Newest CleanLog: ' + JSON.stringify(cleanLog[0]) + ')'); }
+
+		let tz  = this.homey.clock.getTimezone();
+		let time = new Date(cleanLog[0].timestamp*1000).toLocaleString(this.homey.i18n.getLanguage(), 
+            { 
+                hour12: false, 
+                timeZone: tz,
+                hour: "2-digit",
+                minute: "2-digit",
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            });
+        let timestamp = time.replace(',', '');
+
+		const cleanLogTrigger = this.homey.flow.getDeviceTriggerCard('clean_log');
+      	cleanLogTrigger.trigger(this, {
+			timestamp: timestamp,
+			square_meters: cleanLog[0].squareMeters,
+			totel_time: cleanLog[0].totalTimeFormatted
+		}, null).catch((error) => { this.log('Error: ' + error)});
+	}
+
+	async onLastCleanLogs(lastCleanLogs){
+		if (appdebug) { this.log('vacbot.on(LastCleanLogs, ' + JSON.stringify(lastCleanLogs) + ')'); }
+	}
+	
+	// Not emitted for V2
+	// onCleanReport(cleanReport){
+	// 	if (appdebug) { this.log('vacbot.on(CleanReport, ' + JSON.stringify(cleanReport) + ')'); }
+	// 	if (cleanReport != this.getStoreValue('lastCleanReport')
+	// 		|| 
+	// 		cleanReport == CONSTANTS.WORKMODE_ROBOT_IDLE)  {
+	// 		this.vacbot.run('GetCleanLogs');
+	// 		this.setStoreValue('lastCleanReport', cleanReport).catch((error) => { this.error('Error: ' + error); });
+	// 	}
+	// }
+
+	onCurrentStats(currentStats){
+		if (appdebug) { this.log('vacbot.on(CurrentStats, ' + JSON.stringify(currentStats) + ')'); }
 	}
 
 	onMaps(maps){
@@ -838,63 +609,9 @@ class VacuumDevice extends Device {
 		}		
 	}
 
-			// this.vacbot.on('Maps', async (maps) => {
-			// 	if (appdebug) { this.log('vacbot.on(Maps, ' + maps + ')'); }
-			// 	this.log('Updating Maps');
-			// 	var mapnames = [];
-			// 	for (const map of maps['maps']) {
-			// 		mapnames.push(
-			// 			{
-			// 				'mapid': map['mapID'],
-			// 				'mapIndex': map['mapIndex'],
-			// 				'name': map['mapName'],
-			// 				'mapStatus': map['mapStatus'],
-			// 				'mapIsCurrentMap': map['mapIsCurrentMap']
-			// 			}
-			// 		);
-			// 		this.setStoreValue('mapnames', mapnames).catch((error) => { this.error('Error: ' + error); });
-			// 		const mapID = map['mapID'];
-			// 		const mapIndex = map['mapIndex'];
-			// 		if (map['mapIsCurrentMap']) {
-			// 			this.setStoreValue('currentMap', { 'mapID': mapID, 'MapIndex': mapIndex }).catch((error) => { this.error('Error: ' + error); });
-			// 		}
-			// 		this.log('-Updating Floor ' + map['mapName']);
-			// 		await this.vacbot.run('GetSpotAreas', mapID);
-			// 	}
-			// });
-
-			// this.vacbot.on('MapSpotAreas', async (spotAreas) => {
-			// 	if (appdebug) { this.log('vacbot.on(MapSpotAreas, ' + spotAreas + ')'); }
-			// 	for (const spotArea of spotAreas['mapSpotAreas']) {
-			// 		const spotAreaID = spotArea['mapSpotAreaID'];
-			// 		await this.vacbot.run('GetSpotAreaInfo', spotAreas['mapID'], spotAreaID);
-			// 	}
-			// });
-
-			// this.vacbot.on('MapSpotAreaInfo', async (area) => {
-			// 	if (appdebug) { this.log('vacbot.on(MapSpotAreaInfo, ' + area + ')'); }
-			// 	var tableAreas = this.getStoreValue('areas');
-			// 	const index = tableAreas.findIndex(element => element.id === area.mapSpotAreaID);
-			// 	if (index !== -1) { tableAreas.splice(index, 1); }
-			// 	if (!tableAreas.find(o => o.id == area.mapSpotAreaID)) {
-			// 		tableAreas.push(
-			// 			{
-			// 				mapid: area.mapID,
-			// 				name: area.mapSpotAreaName,
-			// 				zoneid: area.mapSpotAreaID,
-			// 				id: area.mapID + area.mapSpotAreaID,
-			// 				toto: area.mapSpotAreaBoundaries,
-			// 				boundaries: this.convertBoundaries(area.mapSpotAreaBoundaries),
-			// 			}
-			// 		);
-			// 		this.setStoreValue('areas', tableAreas).catch((error) => { this.error('Error: ' + error); });
-			// 		await this.createToken(area.mapID, area.mapSpotAreaID, area.mapSpotAreaName).then(() => { this.log('--Updated Zone ' + area.mapSpotAreaName); });
-			// 		var tableAreasPrint = tableAreas;
-			// 		tableAreasPrint.forEach(area => delete area.toto);
-			// 		tableAreasPrint.forEach(area => delete area.boundaries);
-			// 		if (appdebug) { this.log(JSON.stringify(tableAreasPrint)); }
-			// 	}
-			// });
+	async onError(error) {
+		this.log('Deebot Error: ', error);
+	}
 
 
 	// =======================================================================================================================================================================================
@@ -1208,6 +925,19 @@ class VacuumDevice extends Device {
 		this.vacbot.run('SetMajorMap', map.id);		
 	}
 
+	async flowActionGetMapImage(map) {
+		if (appdebug) { this.log('flowActionGetMapImage(' + map.id + ' , ' + map.name + ')'); }
+		if (this.vacbot.isMapImageSupported() == false) { return; }
+		this.vacbot.run('GetMapImage', map.id, "outline");		
+		this.vacbot.run('GetMapInfo', map.id);		
+		this.vacbot.run("GetMinorMap", map.id, 0);
+
+		this.vacbot.mapManager.liveMapImage.getBase64PNG(
+                this.vacbot.deebotPosition, this.vacbot.chargePosition, map.id, this.vacbot.mapManager
+            ).then((base64) => { this.emit('mapImage', base64); });
+	}
+
+
 	// =======================================================================================================================================================================================
 	// FLOW CONDITIONS
 	// =======================================================================================================================================================================================	
@@ -1282,231 +1012,8 @@ class VacuumDevice extends Device {
 		this.vacbot.run('GetMaps', true);
 	}
 
-	// async onCapabilityVacuumPower(value, opts) {
-	// 	this.vacbot.run('SetCleanSpeed', Number(value));
-	// }
-
-	// async onCapabilityCleanCount(boolean, opts) {
-	// 	this.log('onCapabilityCleanCount: ' + (Number(boolean) + 1));
-	// 	this.vacbot.run('SetCleanCount', (Number(boolean) + 1));
-	// }
-
-	// async onCapabilityWaterFlowLevel(value, opts) {
-	// 	this.vacbot.run('SetWaterLevel', Number(value), (Number(this.getCapabilityValue('ScrubbingType')) + 1));
-	// }
-
-	// async onCapabilityAutoEmpty(boolean, opts) {
-	// 	this.vacbot.run('SetAutoEmpty', Number(boolean));
-	// }
-
-	// async onCapabilityScrubbingType(boolean, opts) {
-	// 	this.vacbot.run('SetWaterLevel', this.getCapabilityValue('WaterFlowLevel'), (Number(boolean) + 1));
-	// }
-
-	// async onCapabilityAromaMode(value, opts) {
-	// 	//
-	// }
-
-	// async onCapabilityGotoParkPosition(value, opts) {
-	// 	if (appdebug) { this.log('Navigating to Park Position'); }
-	// 	this.setCapabilityValue('Operation', 'parking').catch((error) => { this.error('Error: ' + error); });
-	// 	const area = this.getStoreValue('parkPosition');
-	// 	this.vacbot.run('GoToPosition', area);
-	// }
-
-	// async onCapabilitySetParkPosition(value, opts) {
-	// 	const PauseCleaning = await this.getCapabilityValue('PauseCleaning');
-	// 	if (PauseCleaning) {
-	// 		this.vacbot.run('GetPosition');
-	// 	} else {
-	// 		if (appdebug) { this.log('Not setting Park Position; Deebot not pauzed!'); }
-	// 	}
-	// }
-
-	// async onCapabilityAlert(boolean, opts) {
-	// 	vacbot.run('GoToPosition', area);
-	// }
-
-	// async onCapabilityAutoClean(value, opts) {
-	// 	if (value) {
-	// 		this.vacbot.clean();
-	// 	} else {
-	// 		this.vacbot.stop();
-	// 	}
-	// }
-
-	// async onCapabilityPauseCleaning(value, opts) {
-	// 	if (value) {
-	// 		if (this.getCapabilityValue('Operation') !== 'idle') {
-	// 			this.vacbot.run('Pause');
-	// 		} else {
-	// 			this.log('Operation idle, can not pause that!');
-	// 			setTimeout(() => {
-	// 				this.setCapabilityValue('PauseCleaning', false).catch((error) => { this.error('Error: ' + error); });
-	// 			}, 1000);
-	// 		}
-	// 	} else {
-	// 		this.vacbot.run('Resume');
-	// 	}
-	// }
-
-	// async onCapabilityReturnDock(value, opts) {
-	// 	if (value) {
-	// 		if (this.getCapabilityValue('Charge') !== 'charging') {
-	// 			this.vacbot.run('Charge');
-	// 		} else {
-	// 			setTimeout(() => {
-	// 				this.log('Deebot already docked, no need to return');
-	// 				this.setCapabilityValue('ReturnDock', false).catch((error) => { this.error('Error: ' + error); });
-	// 			}, 1000);
-	// 		}
-	// 	}
-	// }
-
-	// async flowAutocompleteactionSpotArea(query, args) {
-	// 	var tableAreas = this.getStoreValue('areas');
-	// 	var filtered = tableAreas.filter((element) => {
-	// 		return element.name.toLowerCase().includes(query.toLowerCase());
-	// 	});
-	// 	return filtered;
-	// }
-
 	//////////////////////////////////////////// Utilities ///////////////////////////////////////
 
-	// convertBoundaries(areaBoundaries) {
-	// 	let tableau = areaBoundaries.split(';');
-	// 	let resultat = [];
-
-	// 	tableau.forEach(function (element) {
-	// 		let point = element.split(',');
-	// 		resultat.push([Number(point[0]), Number(point[1])]);
-	// 	});
-
-	// 	return resultat;
-	// }
-
-	// async createToken(mapID, mapSpotAreaID, mapSpotAreaName) {
-	// 	var mapnames = this.getStoreValue('mapnames');
-	// 	var level = this.getStoreValue('mapnames').findIndex((x) => { return x.mapid === mapID; });
-	// 	var tokenName = mapnames.filter(obj => { return obj.mapid === mapID; })[0].name + ' - ' + mapSpotAreaName;
-	// 	var tokenID = level + ':' + mapSpotAreaID;
-
-	// 	if (appdebug) { this.log(`Updating flowToken ${tokenName} (tokenID ${tokenID}) with value [${level}:${mapSpotAreaID}]`); }
-
-	// 	// First try to see if the flowToken already exists, if so first unregister it
-	// 	try {
-	// 		const existingToken = this.homey.flow.getToken(tokenID);
-	// 		await this.homey.flow.unregisterToken(existingToken)
-	// 			.then(() => {
-	// 				;
-	// 				if (appdebug) { this.log(`Token (${existingToken.opts.title}) already existed, unresitered the token`); }
-	// 			})
-	// 			.catch((error) => {
-	// 				this.error(`TokenID (${tokenID}) already existed, but unregistering failed!`);
-	// 			});
-	// 	}
-	// 	catch {
-	// 		if (appdebug) { this.log(`TokenID ${tokenID} (${tokenName}) didn't exist, creating the token`); }
-	// 	}
-
-	// 	// (re-) Create the flowToken and set it's value
-	// 	await this.homey.flow.createToken(tokenID, { type: 'string', title: tokenName })
-	// 		.then((createToken) => {
-	// 			return createToken.setValue('[' + level + ':' + mapSpotAreaID + ']');
-	// 		})
-	// 		.then(() => {
-	// 			if (appdebug) { this.log(`Updated flowToken ${tokenName} (tokenID ${tokenID}) with value [${level}:${mapSpotAreaID}]`); }
-	// 		})
-	// 		.catch((error) => {
-	// 			this.error('Error creating or setting flow token: ' + error);
-	// 		});
-	// }
-
-	// async downloadSecuredContent(cleanReport) {
-	// 	let sign = crypto.createHash('sha256').update(this.vacbot.getCryptoHashStringForSecuredContent()).digest('hex');
-
-	// 	let headers = {
-	// 		'Authorization': 'Bearer ' + this.vacbot.user_access_token,
-	// 		'token': this.vacbot.user_access_token,
-	// 		'appid': 'ecovacs',
-	// 		'plat': 'android',
-	// 		'userid': this.vacbot.uid,
-	// 		'user-agent': 'EcovacsHome/2.3.7 (Linux; U; Android 5.1.1; A5010 Build/LMY48Z)',
-	// 		'v': '2.3.7',
-	// 		'country': this.vacbot.country,
-	// 		'sign': sign,
-	// 		'signType': 'sha256'
-	// 	};
-
-	// 	try {
-	// 		if (appdebug) { this.log(`fetch(cleanReport.imageUrl, { headers })`); }
-	// 		const response = await fetch(cleanReport.imageUrl, { headers });
-	// 		if (!response.ok) {
-	// 			throw new Error(`HTTP error ${response.status}`);
-	// 		}
-	// 		if (response.headers.get('content-type')?.includes('application/json')) {
-	// 			const error = await response.json();
-	// 			this.log(error);
-	// 			throw new Error(JSON.stringify(error));
-	// 		} else {
-	// 			const arrayBuffer = await response.arrayBuffer();
-	// 			const buffer = Buffer.from(arrayBuffer);
-	// 			return buffer;
-	// 		}
-
-	// 		// const image = await Jimp.read(buffer);
-	// 		// const { left, right, top, bottom } = await this.findBoundingBox(image, '#a7bae7');
-
-	// 		// if (appdebug) { this.log('cleanReport.stopReason: ', cleanReport.stopReason); }
-	// 		// const targetColor = { r: 167, g: 186, b: 231 }; 					// #a7bae7 the original bordercolor
-	// 		// let replacementColor = { r: 255, g: 0, b: 0 };
-	// 		// switch ((cleanReport.stopReason - 1).toString()) {
-	// 		// 	case '0': replacementColor = { r: 0, g: 255, b: 0 }; break; 	// CLEAN_SUCCESSFUL
-	// 		// 	case '1': replacementColor = { r: 128, g: 0, b: 128 }; break;	// STOPPED_BY_APP
-	// 		// 	case '2': replacementColor = { r: 255, g: 165, b: 0 }; break;	// BATTERY_LOW
-	// 		// }
-	// 		// image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (x, y, idx) {
-	// 		// 	const pixelColor = this.getPixelColor(x, y);
-	// 		// 	const { r, g, b } = Jimp.intToRGBA(pixelColor);
-	// 		// 	if (r === targetColor.r && g === targetColor.g && b === targetColor.b) {
-	// 		// 		// Vervang de doelkleur door de vervangende kleur (rood)
-	// 		// 		this.setPixelColor(Jimp.rgbaToInt(replacementColor.r, replacementColor.g, replacementColor.b, 255), x, y);
-	// 		// 	}
-	// 		// });
-
-	// 		// const croppedImage = image.crop(left, top, right - left + 1, bottom - top + 1);
-	// 		// const croppedBuffer = await croppedImage.getBufferAsync(Jimp.MIME_PNG);
-	// 		// return croppedBuffer
-	// 	} catch (err) {
-	// 		console.error('[EcoVacsAPI] downloadSecuredContent error:', err);
-	// 		throw err;
-	// 	}
-	// }
-
-	// async findBoundingBox(image, borderColor) {
-	// 	const width = image.bitmap.width;
-	// 	const height = image.bitmap.height;
-
-	// 	const borderR = parseInt(borderColor.slice(1, 3), 16);
-	// 	const borderG = parseInt(borderColor.slice(3, 5), 16);
-	// 	const borderB = parseInt(borderColor.slice(5, 7), 16);
-
-	// 	let left = width, right = 0, top = height, bottom = 0;
-
-	// 	// Zoek de grenzen van de vorm
-	// 	for (let y = 0; y < height; y++) {
-	// 		for (let x = 0; x < width; x++) {
-	// 			const color = Jimp.intToRGBA(image.getPixelColor(x, y));
-	// 			if (color.r === borderR && color.g === borderG && color.b === borderB) {
-	// 				if (x < left) left = x;
-	// 				if (x > right) right = x;
-	// 				if (y < top) top = y;
-	// 				if (y > bottom) bottom = y;
-	// 			}
-	// 		}
-	// 	}
-	// 	return { left, right, top, bottom };
-	// }
 
 	// log() {
 	// 	console.log.bind(this, new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60 * 1000)).toLocaleString('en-US', { day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: this.homey.clock.getTimezone(), hour12: false }).replace(',', '') + " [log] [Device]").apply(this, arguments);
@@ -1516,6 +1023,50 @@ class VacuumDevice extends Device {
 	// 	console.error.bind(this, new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60 * 1000)).toLocaleString('en-US', { day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: this.homey.clock.getTimezone(), hour12: false }).replace(',', '') + " [err] [Device]").apply(this, arguments);
 	// }
 
+	// async getCleaningImage(vacbot, imageUrl) {
+
+	// 	const sign = crypto
+	// 		.createHash('sha256')
+	// 		.update(vacbot.getCryptoHashStringForSecuredContent())
+	// 		.digest('hex');
+
+	// 	const headers = {
+	// 		'Authorization': `Bearer ${vacbot.user_access_token}`,
+	// 		'token': vacbot.user_access_token,
+	// 		'appid': 'ecovacs',
+	// 		'plat': 'android',
+	// 		'userid': vacbot.uid,
+	// 		'user-agent': 'EcovacsHome/2.3.7 (Linux; U; Android 5.1.1; A5010 Build/LMY48Z)',
+	// 		'v': '2.3.7',
+	// 		'country': vacbot.country,
+	// 		'sign': sign,
+	// 		'signType': 'sha256'
+	// 	};
+
+	// 	return new Promise((resolve, reject) => {
+	// 		https.get(imageUrl, { headers }, res => {
+
+	// 			const chunks = [];
+
+	// 			res.on('data', chunk => chunks.push(chunk));
+
+	// 			res.on('end', () => {
+	// 				const data = Buffer.concat(chunks);
+
+	// 				if (res.statusCode !== 200) {
+	// 					return reject(
+	// 						new Error(
+	// 							`HTTP ${res.statusCode}: ${data.toString()}`
+	// 						)
+	// 					);
+	// 				}
+
+	// 				resolve(data);
+	// 			});
+
+	// 		}).on('error', reject);
+	// 	});
+	// }
 }
 
 module.exports = VacuumDevice

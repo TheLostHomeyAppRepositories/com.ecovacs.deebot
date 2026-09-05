@@ -1,0 +1,43 @@
+{
+    "title": {
+        "en": "New clean report",
+        "de": "Neuer Reinigungsbericht",
+        "nl": "Nieuw schoonmaakrapport"
+    },
+    "args": [
+        {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=deebot"
+        }
+    ],
+    "tokens": [
+        {
+            "name": "timestamp",
+            "type": "string",
+            "title": {
+                "en": "Timestamp",
+                "de": "Zeitstempel",
+                "nl": "Tijdstempel"
+            }
+        },
+        {
+            "name": "square_meters",
+            "type": "number",
+            "title": {
+                "en": "Square meters",
+                "de": "Quadratmeter",
+                "nl": "Vierkantmeter"
+            }
+        },
+        {
+            "name": "totel_time",
+            "type": "string",
+            "title": {
+                "en": "Total time",
+                "de": "Gesamtzeit",
+                "nl": "Totaal tijd"
+            }
+        }
+    ]
+}

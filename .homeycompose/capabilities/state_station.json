@@ -35,6 +35,14 @@
             }
         },
         {
+            "id": "spinDrying",
+            "title": {
+                "en": "Spin drying",
+                "de": "Spin Trocknung",
+                "nl": "Spin drogen"
+            }
+        },
+        {
             "id": "goCharging",
             "title": {
                 "en": "Go to charge",

@@ -8,7 +8,7 @@
             "error": "Die Anmeldedaten sind ungültig!"
         }
     },
-    "Deebot": {
+    "error": {
         "Error-3": "Fehler beim Verarbeiten der Antwortdaten",
         "Error-2": "Interner Fehler",
         "Error-1": "Host nicht erreichbar oder Kommunikationsfehler",

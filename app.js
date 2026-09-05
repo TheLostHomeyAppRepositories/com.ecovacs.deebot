@@ -197,6 +197,18 @@ class Deebot extends Homey.App {
 			return await args.device.flowActionSetCleanCountpMode( args.mode );
 		});
 
+		try{
+		this.homey.flow.getActionCard('get_map_image')
+			.registerRunListener(async (args, state) => {
+				return await args.device.flowActionGetMapImage( args.map );
+			})
+			.registerArgumentAutocompleteListener('map', async (query, args) => {
+				const mapList = args.device.getAutocompleteMapList(true);
+				return mapList.filter((result) => { 
+					return result.name.toLowerCase().includes(query.toLowerCase());
+				});
+			});
+		}catch(error){}
 	}
 
 	// =======================================================================================================================================================================================
