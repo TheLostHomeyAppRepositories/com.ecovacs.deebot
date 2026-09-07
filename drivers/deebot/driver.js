@@ -156,7 +156,7 @@ class VacuumDriver extends Driver {
 			.filter((device) => device.product_category === 'DEEBOT')
 			.map((device) => {
 				return {
-					name: device.nick,
+					name: device.deviceName,
 					data: {
 						id: device.did
 					},

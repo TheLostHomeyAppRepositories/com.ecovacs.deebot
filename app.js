@@ -162,6 +162,41 @@ class Deebot extends Homey.App {
 				});
 			});
 
+		this.homey.flow.getActionCard('clean_zones')
+			.registerRunListener(async (args, state) => {
+				return await args.device.flowActionCleanZones( args );
+			})
+			.registerArgumentAutocompleteListener('zone01', async (query, args) => {
+				const zoneList = args.device.getAutocompleteZoneList(true);
+				return zoneList.filter((result) => { 
+					return result.name.toLowerCase().includes(query.toLowerCase());
+				});
+			})
+			.registerArgumentAutocompleteListener('zone02', async (query, args) => {
+				const zoneList = args.device.getAutocompleteZoneList(true);
+				return zoneList.filter((result) => { 
+					return result.name.toLowerCase().includes(query.toLowerCase());
+				});
+			})
+			.registerArgumentAutocompleteListener('zone03', async (query, args) => {
+				const zoneList = args.device.getAutocompleteZoneList(true);
+				return zoneList.filter((result) => { 
+					return result.name.toLowerCase().includes(query.toLowerCase());
+				});
+			})
+			.registerArgumentAutocompleteListener('zone04', async (query, args) => {
+				const zoneList = args.device.getAutocompleteZoneList(true);
+				return zoneList.filter((result) => { 
+					return result.name.toLowerCase().includes(query.toLowerCase());
+				});
+			})
+			.registerArgumentAutocompleteListener('zone05', async (query, args) => {
+				const zoneList = args.device.getAutocompleteZoneList(true);
+				return zoneList.filter((result) => { 
+					return result.name.toLowerCase().includes(query.toLowerCase());
+				});
+			});
+
 		this.homey.flow.getActionCard('set_map')
 			.registerRunListener(async (args, state) => {
 				return await args.device.flowActionSetMap( args.map );

@@ -1,0 +1,99 @@
+{
+    "title": {
+        "en": "Clean zones",
+        "de": "Zonen reinigen",
+        "nl": "Reinig zones"
+    },
+    "titleFormatted": {
+        "en": "Clean zones [[zone01]], [[zone02]], [[zone03]], [[zone04]], [[zone05]]",
+        "de": "Reinige Zonen [[zone01]], [[zone02]], [[zone03]], [[zone04]], [[zone05]]",
+        "nl": "Reinig zones [[zone01]], [[zone02]], [[zone03]], [[zone04]], [[zone05]]"
+    },
+    "hint": {
+        "en": "The zone can only be selected from active map",
+        "de": "Die Zone kann nur aus der aktiven Karte ausgewählt werden",
+        "nl": "De zone kan alleen worden geselecteerd uit de actieve kaart"
+    },
+    "args": [
+        {
+            "type": "autocomplete",
+            "name": "zone01",
+            "required": true,
+            "title": {
+                "en": "Zone",
+                "de": "Zone",
+                "nl": "Kamer"
+            },
+            "placeholder": {
+                "en": "Kitchen",
+                "de": "Küche",
+                "nl": "Keuken"
+            }
+        },
+        {
+            "type": "autocomplete",
+            "name": "zone02",
+            "required": false,
+            "title": {
+                "en": "Zone",
+                "de": "Zone",
+                "nl": "Kamer"
+            },
+            "placeholder": {
+                "en": "Kitchen",
+                "de": "Küche",
+                "nl": "Keuken"
+            }
+        },
+        {
+            "type": "autocomplete",
+            "name": "zone03",
+            "required": false,
+            "title": {
+                "en": "Zone",
+                "de": "Zone",
+                "nl": "Kamer"
+            },
+            "placeholder": {
+                "en": "Kitchen",
+                "de": "Küche",
+                "nl": "Keuken"
+            }
+        },
+        {
+            "type": "autocomplete",
+            "name": "zone04",
+            "required": false,
+            "title": {
+                "en": "Zone",
+                "de": "Zone",
+                "nl": "Kamer"
+            },
+            "placeholder": {
+                "en": "Kitchen",
+                "de": "Küche",
+                "nl": "Keuken"
+            }
+        },
+        {
+            "type": "autocomplete",
+            "name": "zone05",
+            "required": false,
+            "title": {
+                "en": "Zone",
+                "de": "Zone",
+                "nl": "Kamer"
+            },
+            "placeholder": {
+                "en": "Kitchen",
+                "de": "Küche",
+                "nl": "Keuken"
+            }
+        },
+        {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=deebot"
+        }
+    ]
+}

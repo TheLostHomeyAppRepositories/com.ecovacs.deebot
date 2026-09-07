@@ -441,9 +441,13 @@ class VacuumDevice extends Device {
 	onCleanLog(cleanLog){
 		// if (appdebug) { this.log('vacbot.on(CleanLog, ' + JSON.stringify(cleanLog) + ')'); }
 		if (appdebug) { this.log('vacbot.on(CleanLog Newest CleanLog: ' + JSON.stringify(cleanLog[0]) + ')'); }
+		if (cleanLog == undefined || cleanLog[0] == undefined) {
+			return;
+		}
 
 		let tz  = this.homey.clock.getTimezone();
-		let time = new Date(cleanLog[0].timestamp*1000).toLocaleString(this.homey.i18n.getLanguage(), 
+		let cleanTimestamp = cleanLog[0].timestamp == undefined? new Date(now) : new Date(cleanLog[0].timestamp*1000);
+		let time = cleanTimestamp.toLocaleString(this.homey.i18n.getLanguage(), 
             { 
                 hour12: false, 
                 timeZone: tz,
@@ -568,6 +572,10 @@ class VacuumDevice extends Device {
 
 	onMapSet(mapset){
 		if (appdebug) { this.log('vacbot.on(MapSet_V2, ' + JSON.stringify(mapset) + ')'); }
+
+		if (mapset == undefined || mapset['subsets'] == undefined) {
+			return;
+		}
 
 		let areas = this.getStoreValue('areas');
 		areas = areas.filter(item => item.mapid !== mapset.mid);
@@ -855,6 +863,21 @@ class VacuumDevice extends Device {
 	async flowActionCleanZone(zone) {
 		if (appdebug) { this.log('flowActionCleanZone(' + zone + ')'); }
 		this.vacbot.run('SpotArea', zone.id.zoneid, 1);
+		// await this.vacbot.run('FreeCLean', '1,' + zone.id.zoneid, 1);
+	}
+
+	async flowActionCleanZones(args) {
+		if (appdebug) { this.log('flowActionCleanZonea(' + args + ')'); }
+		const zones = [
+			args.zone01?.id.zoneid,
+			args.zone02?.id.zoneid,
+			args.zone03?.id.zoneid,
+			args.zone04?.id.zoneid,
+			args.zone05?.id.zoneid
+		]
+		.filter(id => id != null)
+		.join(',');
+		this.vacbot.run('SpotArea', zones, 1);
 		// await this.vacbot.run('FreeCLean', '1,' + zone.id.zoneid, 1);
 	}
 
